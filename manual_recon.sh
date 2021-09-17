@@ -17,10 +17,13 @@ done
 #-----------------------------------------------------------------------------
 # man page
 man_help() {
-	echo -e "# Get Help\n./manual_recon.sh -h\n"
-
-	echo -e "./manual_recon.sh -o <option> <flags>\n"
-	echo -e "-o | Value Of Which Cheat Sheet To Show 0R All Of Them"
+	echo "#--------------------------------------------------------------------------------"
+	echo -e "# Get Help\n\n./manual_recon.sh\nOR\n./manual_recon.sh -h\n"
+	echo "#--------------------------------------------------------------------------------"
+	echo -e "# Basic Use Of Manual Recon\n\n./manual_recon.sh -o <option> <flags>\n"
+	echo "#--------------------------------------------------------------------------------"
+	echo -e "# Cheat Sheet Options\n"
+	echo -e "-o <cheat_sheet_value> | Value Of Which Cheat Sheet To Show 0R All Of Them"
 	echo -e "-o e | Exploit Frameworks Cheat Sheet"
 	echo -e "-o r | Remote Scanning Cheat Sheet"
 	echo -e "-o m | Windows Cheat Sheet"
@@ -31,12 +34,14 @@ man_help() {
 	echo -e "-o w | Web Server Cheat Sheet"
 	echo -e "-o d | Database Cheat Sheet"
 	echo -e "-o a | Dump All Current Cheat Sheets\n"
-
-	echo -e "# RPORT, RHOST, LHOST, and LPORT User Arguments"
-	echo -e "NOTE: Required User Arguments May Change Based The Option Used"
-
-	echo -e "# Manual Recon Examples Commands"
-	echo -e "./manual_recon.sh -o w -rh 10.10.10.1"
+	echo "#--------------------------------------------------------------------------------"
+	echo -e "# RHORT, RPOST, LHOST, and LPORT User Arguments\n"
+	echo -e "-rh <RHOST-IP> | RHOST/Target IP-Address\n-rp <RPORT-NUM> | RPORT or Port Number Of Target"
+	echo -e "-lp <LHOST-IP> | LHOST/Listen IP-Address\n-lp <LPORT-NUM> | LPORT or Port Number Of Listener\n"
+	echo -e "{!} NOTE: Required User Arguments May Change Based The Option Used {!}\n"
+	echo "#--------------------------------------------------------------------------------"
+	echo -e "# Manual Recon Examples Commands\n"
+	echo -e "./manual_recon.sh -o w -rh 10.10.10.1\n"
 }
 #----------------------------------
 # all manual recon print functions
@@ -138,12 +143,17 @@ echo "--------------------------------------------------------------------------
 remote_help(){
 echo "--------------------------------------------------------------------------------------"
 echo -e "# Port Scanning"
-
+echo -e "nmap -v -p- -Pn $RHOST -oN nmap.out"
+echo -e "nmap -Pn -p1-1000 -v -sC -sV $RHOSTS -oN script_nmap.out\n"
+echo -e "
 }
 exploit_frameworks(){
 echo -e "# Metasploit"
+echo -e "sudo systemctl start postgresql && msfconsole"
+echo -e "msfdb run"
 
 echo -e "# PowerShell-Empire"
+echo -e "#
 
 echo -e "# Covenant"
 }
