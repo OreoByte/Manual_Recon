@@ -7,19 +7,18 @@ USER='UserName'
 PW='P@ssw0rd'
 DB='Database_Name'
 Domain='domain.local'
-while [ "$#" -gt 0 ]
+while getopts ":h:o:rh:rp:lh:lp:db:d:" opts
 do
-case "$1" in
-	-h) man_help;;
-	-o) option=$2;;
-	-rh) RHOST=$2;;
-	-rp) RPORT=$2;;
-	-lh) LHOST=$2;;
-	-lp) LPORT=$2;;
-	-db) DB=$2;;
-	-d) Domain=$2;;
+	case "${opts}" in
+	h) helper=${OPTARG};;
+	o) option=${OPTARG};;
+	rh) RHOST=${OPTARG};;
+	rp) RPORT=${OPTARG};;
+	lh) LHOST=${OPTARG};;
+	lp) LPORT=${OPTARG};;
+	db) DB=${OPTARG};;
+	d) Domain=${OPTARG};;
 esac
-shift
 done
 man_help() {
 	echo "#--------------------------------------------------------------------------------"
@@ -218,7 +217,9 @@ print_all_manual_recon(){
 	pw_cracking_help
 }
 #--------------------------------
-if [[ $option == "m" ]]; then
+if [[ $helper == "-h" ]]; then
+	man_help
+elif [[ $option == "m" ]]; then
 	windows_help
 elif [[ $option == "l" ]]; then
 	linux_help
