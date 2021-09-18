@@ -3,19 +3,23 @@ RHOST='127.0.0.1'
 RPORT='4444'
 LHOST='127.0.0.1'
 LPORT='6900'
-while getopts ":h:o:r:rp:lh:lp:" opts
+USER='UserName'
+PW='P@ssw0rd'
+DB='Database_Name'
+Domain='domain.local'
+while getopts :h:o:"rh":"rp":"lh":"lp":db:d: opts
 do
 	case "${opts}" in
 	h) helper=${OPTARG};;
 	o) option=${OPTARG};;
-	r) RHOST=${OPTARG};;
-	rp) RPORT=${OPTARG};;
-	lh) LHOST=${OPTARG};;
-	lp) LPORT=${OPTARG};;
+	rh | --rh) shift RHOST=${OPTARG};;
+	rp | --rp) shift RPORT=${OPTARG};;
+	lh | --lh) shift LHOST=${OPTARG};;
+	lp | --lp) shift LPORT=${OPTARG};;
+	db) DB=${OPTARG};;
+	d) Domain=${OPTARG};;
 esac
 done
-#-----------------------------------------------------------------------------
-# man page
 man_help() {
 	echo "#--------------------------------------------------------------------------------"
 	echo -e "# Get Help\n\n./manual_recon.sh\nOR\n./manual_recon.sh -h\n"
@@ -38,13 +42,14 @@ man_help() {
 	echo -e "# RHORT, RPOST, LHOST, and LPORT User Arguments\n"
 	echo -e "-rh <RHOST-IP> | RHOST/Target IP-Address\n-rp <RPORT-NUM> | RPORT or Port Number Of Target"
 	echo -e "-lp <LHOST-IP> | LHOST/Listen IP-Address\n-lp <LPORT-NUM> | LPORT or Port Number Of Listener\n"
+	echo -e "# Domain Nane and DataBase Name\n\n-db <DB_Name> | Database Name To Use or Select"
+	echo -e "-d <Domain_Name> | Domain or Netbios Name Of Remote RHOST\n"
 	echo -e "{!} NOTE: Required User Arguments May Change Based The Option Used {!}\n"
 	echo "#--------------------------------------------------------------------------------"
 	echo -e "# Manual Recon Examples Commands\n"
 	echo -e "./manual_recon.sh -o w -rh 10.10.10.1\n"
+	echo "#--------------------------------------------------------------------------------------"
 }
-#----------------------------------
-# all manual recon print functions
 windows_help(){
 echo "--------------------------------------------------------------------------------------"
 echo -e "# Kerberos"
@@ -56,7 +61,6 @@ echo -e "# Exploit Group Permissions"
 echo -e "# Bypass Windows Security"
 echo "--------------------------------------------------------------------------------------"
 }
-#---------------------------------
 linux_help(){
 echo "--------------------------------------------------------------------------------------"
 echo -e "# Kernel Exploits Checks"
@@ -74,7 +78,6 @@ echo -e "# Crontab Checks"
 echo -e "# sudo -l checks"
 echo "--------------------------------------------------------------------------------------"
 }
-#---------------------------------
 stego_help(){
 echo "--------------------------------------------------------------------------------------"
 echo -e "# Image Stego"
@@ -91,9 +94,8 @@ echo -e "# Payload Generation With msfvenom"
 echo -e "# Online Payload Generation Tools/References"
 echo "--------------------------------------------------------------------------------------"
 }
-#---------------------------------
 website_help(){
-echo "--------------------------------------------------------------------------------------"
+echo "#--------------------------------------------------------------------------------------"
 echo -e "# Web Technology Fuzzing"
 echo -e
 
@@ -129,41 +131,79 @@ echo -e "## Vhost Fuzzing Wtih Ffuf"
 echo -e "## Vhost Fuzzing With gobuster"
 
 echo -e "#"
-echo "--------------------------------------------------------------------------------------"
+echo "#--------------------------------------------------------------------------------------"
 }
-#---------------------------------------------
 database_help(){
-echo "--------------------------------------------------------------------------------------"
-echo -e "# Remote DataBase Clients"
+echo "#--------------------------------------------------------------------------------------"
+echo -e "\n# Remote DataBase Clients\n"
 
-echo -e "# Simple SQL Injections"
-echo "--------------------------------------------------------------------------------------"
+echo -e "--------------------------------------------------------------------------------------\n## MySQL Client\n"
+echo -e "mysql -u root -p\nmysql -u root -p -h $RHOST\n"
+echo -e "mysql -D $DB -u root -p -h $RHOST"
+echo -e "mysql -D $DB -u root --password=$PW -e 'select * from users'\n"
+
+echo -e "--------------------------------------------------------------------------------------\n## Microsoft SQL Clients\n"
+echo -e "impacket-mssqlclient $USER@$RHOST -windows-auth\n"
+echo -e "impacket-mssqlclient $Domain/$USER@$RHOST -windows-auth"
+echo -e "impacket-mssqlclient $Domain/$USER:$PW@$RHOST\n"
+
+echo -e "mssql -s $RHOST -u $USER -p $PW\n"
+
+echo -e "\n--------------------------------------------------------------------------------------\n## No-SQL Client\n"
+echo -e "### Redis Server\n\nredis-cli -h $RHOST\nredis-cli -h $RHOST ping\nredis-cli -h $RHOST info\n"
+
+echo -e "### Apache CouchDB\n\n(FireFox) URL == http://$RHOST:5984/_utils\n"
+echo -e "curl http://$RHOST:5984/_all_dbs\ncurl http://$RHOST:5984/secret/_all_docs\n"
+echo -e "curl -X GET http://$RHOST:5984/Database_Name/Record-ID-Hash | jq"
+echo -e "curl -X GET http://$RHOST:5984/secret/a1320dd69fb4570d0a3d26df4e000be7 | jq"
+
+echo -e "\n--------------------------------------------------------------------------------------\n# Simple SQL Injections\n"
+echo -e "## Automated SQL-Injection Checks\n\nsqlmap -u http://$RHOST/login.php\nsqlmap -r webrequest.req\n"
+
+echo -e "## Manual SQL-Injection Checks\n"
+
+echo "#--------------------------------------------------------------------------------------"
 }
 #---------------------------------------------
 remote_help(){
-echo "--------------------------------------------------------------------------------------"
+echo "#--------------------------------------------------------------------------------------"
 echo -e "# Port Scanning"
 echo -e "nmap -v -p- -Pn $RHOST -oN nmap.out"
 echo -e "nmap -Pn -p1-1000 -v -sC -sV $RHOSTS -oN script_nmap.out\n"
-echo -e "
+echo -e ""
+echo "#--------------------------------------------------------------------------------------"
 }
 exploit_frameworks(){
-echo -e "# Metasploit"
-echo -e "sudo systemctl start postgresql && msfconsole"
+echo "#--------------------------------------------------------------------------------------"
+echo -e "\n--------------------------------------------------------------------------------------\n# Metasploit"
+echo -e "sudo systemctl start postgresql && msfconsole\n\nsudo systemctl start postgresql && APRILFOOLSPONIES=true msfconsole"
+echo -e "sudo systemctl start postgresql && THISISHALLOWEEN=true msfconsole\n"
 echo -e "msfdb run"
 
-echo -e "# PowerShell-Empire"
-echo -e "#
+echo -e "\n--------------------------------------------------------------------------------------\n# PowerShell-Empire (Needs Two Terminals For <Server & Client>)"
+echo -e "\nsudo powershell-empire server\nsudo powershell-empire client\n"
 
-echo -e "# Covenant"
+echo -e "--------------------------------------------------------------------------------------\n# Covenant C2\n\ndotnet run"
+echo -e "docker run -it -p 7443:7443 -p 80:80 -p 443:443 --name covenant -v </absolute/path/to/Covenant/Covenant/Data>:/app/Data covenant\n"
+echo "#--------------------------------------------------------------------------------------"
 }
 pw_cracking_help(){
-echo -e "# Ways To ID Identify The Hash Type"
+echo "#--------------------------------------------------------------------------------------"
+echo -e "\n--------------------------------------------------------------------------------------\n# Ways To ID Identify The Hash Type"
 
-echo -e "# Password/Hash Cracking With Hashcat"
+echo -e "\nhashcat --example-hashes | less\n\nhashid hash.txt\nhashid <hash-string>\nhashid <hash-string> -mj\n"
 
-echo -e "# Password/Hash Cracking With John The Ripper"
-echo "--------------------------------------------------------------------------------------"
+echo -e "echo -n '<hash-string>' | hash-identifier\ncat hash.txt | hash-identifier\n"
+
+echo -e "haiti <hash-string>\nhaiti -e <extended_salted_hash-string>\n"
+
+echo -e "--------------------------------------------------------------------------------------\n# Password/Hash Cracking With Hashcat\n"
+echo -e "hashcat -m <hash-mode-number> hash.txt /usr/share/wordlists/rockyou.txt"
+echo -e "hashcat -m 0 md5_hash.txt /usr/share/wordlists/rockyou.txt\n"
+
+echo -e "--------------------------------------------------------------------------------------\n# Password/Hash Cracking With John The Ripper\n"
+echo -e "john hash.txt\njohn hash.txt -w=/usr/share/wordlists/rockyou.txt\n"
+echo "#--------------------------------------------------------------------------------------"
 }
 #===================================
 print_all_manual_recon(){
@@ -176,7 +216,7 @@ print_all_manual_recon(){
 	exploit_frameworks
 	pw_cracking_help
 }
-#====================================
+#--------------------------------
 if [[ $helper == "-h" ]]; then
 	man_help
 elif [[ $option == "m" ]]; then
