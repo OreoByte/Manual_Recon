@@ -10,7 +10,6 @@ Domain='domain.local'
 while [ "$#" -gt 0 ]
 do
 case "$1" in
-	-h) man_help;;
 	-o) option=$2;;
 	-c) config=$2
 	RHOST=$(cat $config|grep RHOST|grep -o -P "(?<=').*(?=')")
@@ -32,35 +31,35 @@ esac
 shift
 done
 man_help() {
-	echo "#--------------------------------------------------------------------------------"
-	echo -e "# Get Help\n\n./manual_recon.sh\nOR\n./manual_recon.sh -h\n"
-	echo "#--------------------------------------------------------------------------------"
-	echo -e "# Basic Use Of Manual Recon\n\n./manual_recon.sh -o <option> <flags>\n"
-	echo "#--------------------------------------------------------------------------------"
-	echo -e "# Cheat Sheet Options\n"
-	echo -e "-o <cheat_sheet_value> | Value Of Which Cheat Sheet To Show 0R All Of Them\n"
-	echo -e "-o e | Exploit Frameworks Cheat Sheet"
-	echo -e "-o r | Remote Scanning Cheat Sheet"
-	echo -e "-o m | Windows Cheat Sheet"
-	echo -e "-o l | Linux Cheat Sheet"
-	echo -e "-o s | Stego Cheat Sheet"
-	echo -e "-o p | Password/Hash Cracking Cheat Sheet"
-	echo -e "-o S | Shells/RevShells Cheat Sheet"
-	echo -e "-o w | Web Server Cheat Sheet"
-	echo -e "-o d | Database Cheat Sheet\n-o n | Network Pivoting Cheat Sheet\n"
-	echo -e "-o a | Dump All Current Cheat Sheets\n"
-	echo "#--------------------------------------------------------------------------------"
-	echo -e "# RHORT, RPOST, LHOST, and LPORT User Arguments\n"
-	echo -e "-rh <RHOST-IP> | RHOST/Target IP-Address\n-rp <RPORT-NUM> | RPORT or Port Number Of Target"
-	echo -e "-lp <LHOST-IP> | LHOST/Listen IP-Address\n-lp <LPORT-NUM> | LPORT or Port Number Of Listener\n"
-	echo -e "# Domain Nane and Database Name\n\n-db <DB_Name> | Database Name To Use or Select"
-	echo -e "-d <Domain_Name> | Domain or Netbios Name Of Remote RHOST\n"
-	echo -e "# Custom Username and Password\n\n-u <username> | Username Of A Discovered User\n-p <password> | Password To Test or Has Been Discovered\n"
-	echo -e "{!} NOTE: Required User Arguments May Change Based The Option Used {!}\n"
-	echo "#--------------------------------------------------------------------------------"
-	echo -e "# Manual Recon Examples Commands\n"
-	echo -e "./manual_recon.sh -o w -rh 10.10.10.1\n"
-	echo "#--------------------------------------------------------------------------------------"
+        echo "#--------------------------------------------------------------------------------"
+        echo -e "# Get Help\n\n./manual_recon.sh\n"
+        echo "#--------------------------------------------------------------------------------"
+        echo -e "# Basic Use Of Manual Recon\n\n./manual_recon.sh -o <option> <flags>\n"
+        echo "#--------------------------------------------------------------------------------"
+        echo -e "# Cheat Sheet Options\n"
+        echo -e "-o <cheat_sheet_value> | Value Of Which Cheat Sheet To Show 0R All Of Them\n"
+        echo -e "-o e | Exploit Frameworks Cheat Sheet"
+        echo -e "-o r | Remote Scanning Cheat Sheet"
+        echo -e "-o m | Windows Cheat Sheet"
+        echo -e "-o l | Linux Cheat Sheet"
+        echo -e "-o s | Stego Cheat Sheet"
+        echo -e "-o p | Password/Hash Cracking Cheat Sheet"
+        echo -e "-o S | Shells/RevShells Cheat Sheet"
+        echo -e "-o w | Web Server Cheat Sheet"
+        echo -e "-o d | Database Cheat Sheet\n-o n | Network Pivoting Cheat Sheet\n"
+        echo -e "-o a | Dump All Current Cheat Sheets\n"
+        echo "#--------------------------------------------------------------------------------"
+        echo -e "# RHORT, RPOST, LHOST, and LPORT User Arguments\n"
+        echo -e "-rh <RHOST-IP> | RHOST/Target IP-Address\n-rp <RPORT-NUM> | RPORT or Port Number Of Target"
+        echo -e "-lp <LHOST-IP> | LHOST/Listen IP-Address\n-lp <LPORT-NUM> | LPORT or Port Number Of Listener\n"
+        echo -e "# Domain Nane and Database Name\n\n-db <DB_Name> | Database Name To Use or Select"
+        echo -e "-d <Domain_Name> | Domain or Netbios Name Of Remote RHOST\n"
+        echo -e "# Custom Username and Password\n\n-u <username> | Username Of A Discovered User\n-p <password> | Password To Test or Has Been Discovered\n"
+        echo -e "{!} NOTE: Required User Arguments May Change Based The Option Used {!}\n"
+        echo "#--------------------------------------------------------------------------------"
+        echo -e "# Manual Recon Examples Commands\n"
+        echo -e "./manual_recon.sh -o w -rh 10.10.10.1\n./manual_recon.sh -c user.config -u superadmin\n"
+        echo "#--------------------------------------------------------------------------------------"
 }
 windows_help(){
 echo "#--------------------------------------------------------------------------------------"
@@ -185,7 +184,7 @@ echo -e "impacket-mssqlclient $Domain/$USER:$PW@$RHOST\n"
 
 echo -e "mssql -s $RHOST -u $USER -p $PW\n"
 
-echo -e "\n--------------------------------------------------------------------------------------\n## No-SQL Client\n"
+echo -e "--------------------------------------------------------------------------------------\n## No-SQL Client\n"
 echo -e "### Redis Server\n\nredis-cli -h $RHOST\nredis-cli -h $RHOST ping\nredis-cli -h $RHOST info\n"
 
 echo -e "### Apache CouchDB\n\n(FireFox) URL == http://$RHOST:5984/_utils\n"
