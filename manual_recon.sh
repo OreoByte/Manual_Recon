@@ -12,12 +12,22 @@ do
 case "$1" in
 	-h) man_help;;
 	-o) option=$2;;
+	-c) config=$2
+	RHOST=$(cat $config|grep RHOST|grep -o -P "(?<=').*(?=')")
+	RPORT=$(cat $config|grep RPORT|grep -o -P "(?<=').*(?=')")
+	LHOST=$(cat $config|grep LHOST|grep -o -P "(?<=').*(?=')")
+	DB=$(cat $config|grep DB|grep -o -P "(?<=').*(?=')")
+	Domain=$(cat $config|grep Domain|grep -o -P "(?<=').*(?=')")
+	USER=$(cat $config|grep USER|grep -o -P "(?<=').*(?=')")
+	PW=$(cat $config|grep PW|grep -o -P "(?<=').*(?=')");;
 	-rh) RHOST=$2;;
 	-rp) RPORT=$2;;
 	-lh) LHOST=$2;;
 	-lp) LPORT=$2;;
 	-db) DB=$2;;
 	-d) Domain=$2;;
+	-u) USER=$2;;
+	-p) PW=$2;;
 esac
 shift
 done
@@ -28,7 +38,7 @@ man_help() {
 	echo -e "# Basic Use Of Manual Recon\n\n./manual_recon.sh -o <option> <flags>\n"
 	echo "#--------------------------------------------------------------------------------"
 	echo -e "# Cheat Sheet Options\n"
-	echo -e "-o <cheat_sheet_value> | Value Of Which Cheat Sheet To Show 0R All Of Them"
+	echo -e "-o <cheat_sheet_value> | Value Of Which Cheat Sheet To Show 0R All Of Them\n"
 	echo -e "-o e | Exploit Frameworks Cheat Sheet"
 	echo -e "-o r | Remote Scanning Cheat Sheet"
 	echo -e "-o m | Windows Cheat Sheet"
@@ -37,14 +47,15 @@ man_help() {
 	echo -e "-o p | Password/Hash Cracking Cheat Sheet"
 	echo -e "-o S | Shells/RevShells Cheat Sheet"
 	echo -e "-o w | Web Server Cheat Sheet"
-	echo -e "-o d | Database Cheat Sheet"
+	echo -e "-o d | Database Cheat Sheet\n-o n | Network Pivoting Cheat Sheet\n"
 	echo -e "-o a | Dump All Current Cheat Sheets\n"
 	echo "#--------------------------------------------------------------------------------"
 	echo -e "# RHORT, RPOST, LHOST, and LPORT User Arguments\n"
 	echo -e "-rh <RHOST-IP> | RHOST/Target IP-Address\n-rp <RPORT-NUM> | RPORT or Port Number Of Target"
 	echo -e "-lp <LHOST-IP> | LHOST/Listen IP-Address\n-lp <LPORT-NUM> | LPORT or Port Number Of Listener\n"
-	echo -e "# Domain Nane and DataBase Name\n\n-db <DB_Name> | Database Name To Use or Select"
+	echo -e "# Domain Nane and Database Name\n\n-db <DB_Name> | Database Name To Use or Select"
 	echo -e "-d <Domain_Name> | Domain or Netbios Name Of Remote RHOST\n"
+	echo -e "# Custom Username and Password\n\n-u <username> | Username Of A Discovered User\n-p <password> | Password To Test or Has Been Discovered\n"
 	echo -e "{!} NOTE: Required User Arguments May Change Based The Option Used {!}\n"
 	echo "#--------------------------------------------------------------------------------"
 	echo -e "# Manual Recon Examples Commands\n"
@@ -52,7 +63,9 @@ man_help() {
 	echo "#--------------------------------------------------------------------------------------"
 }
 windows_help(){
-echo "--------------------------------------------------------------------------------------"
+echo "#--------------------------------------------------------------------------------------"
+echo -e "\n--------------------------------------------------------------------------------------\n# Enum Valid Users\n"
+
 echo -e "# Kerberos"
 
 echo -e "# Ways To Authenticate To Windows Machine"
@@ -60,23 +73,26 @@ echo -e "# Ways To Authenticate To Windows Machine"
 echo -e "# Exploit Group Permissions"
 
 echo -e "# Bypass Windows Security"
-echo "--------------------------------------------------------------------------------------"
+echo "#--------------------------------------------------------------------------------------"
 }
 linux_help(){
 echo "--------------------------------------------------------------------------------------"
-echo -e "# Kernel Exploits Checks"
 
-echo -e "# SUID"
+echo -e "--------------------------------------------------------------------------------------\n# Post Shell Privilege EXEC\n"
 
-echo -e "# File Ownship Checks"
+echo -e "## Kernel Exploits Checks"
 
-echo -e "# File Caps"
+echo -e "## SUID"
 
-echo -e "# Writable Files"
+echo -e "## File Ownship Checks"
 
-echo -e "# Crontab Checks"
+echo -e "## File Caps"
 
-echo -e "# sudo -l checks"
+echo -e "## Writable Files"
+
+echo -e "## Crontab Checks"
+
+echo -e "## sudo -l checks"
 echo "--------------------------------------------------------------------------------------"
 }
 stego_help(){
@@ -97,41 +113,60 @@ echo "--------------------------------------------------------------------------
 }
 website_help(){
 echo "#--------------------------------------------------------------------------------------"
-echo -e "# Web Technology Fuzzing"
-echo -e
+echo -e "\n# Web Server Fuzzing\n"
 
-echo -e "# Directory Brute Forcing"
-echo -e "## Feroxbuster\n"
-echo -e "### Default Feroxbuster Directory Scan\n"
-echo -e "feroxbuster -u <url.thm>"
+echo -e "--------------------------------------------------------------------------------------\n# Directory Brute Forcing\n"
+echo -e "## Feroxbuster Directory Fuzzing\n"
+echo -e "feroxbuster -u $RHOST"
+echo -e "feroxbuster -u $RHOST -w ./wordlist.txt"
+echo -e "feroxbuster -u $RHOST -w ./wordlist.txt -e txt,php,html,bak"
 
-echo -e "### Feroxbuster Directory Scan With Another Wordlist"
-echo -e "feroxbuster -u <url> -w </path/to/wordslist.txt\>n-u | <rhost-ip_OR_domain>\n-w | <wordlist.txt>"
+echo -e "\n## Dirb Directory Fuzzing"
+echo -e "dirb http://$RHOST\ndirb http://$RHOST -X .txt,.php,.html,.bak -o dirb.out\n"
+echo -e "dirb http://$RHOST ./wordlist.txt -X .txt,.bak,.php"
 
-echo -e "\n### Feroxbuster Directory Scan With Extentions"
-echo -e "feroxbuster -u <url> -w </path/to/wordlist.txt> -e txt,php,html,bak"
+echo -e "\n## Wfuzz Directory Fuzzing"
+echo -e "wfuzz -c -u http://$RHOST/FUZZ -w ./wordlist.txt -f wfuzz.out\nwfuzz -c -u http://$RHOST/FUZZ -w ./wordlist.txt --hc=404 -f wfuzz.out"
 
-echo -e "\n## Dirb "
-echo -e "dirb http://$RHOST\ndirb http://$RHOST -X .txt,.php,.html,.bak -o dirb.out\nOR\n"
-echo -e "dirb http://$RHOST /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -X .txt"
+echo -e "\n## Ffuf Directory Fuzzing\n"
+echo -e "ffuf -c -w ./wordlist.txt -u http://$RHOST/FUZZ -o ffuf.out"
+echo -e "ffuf -c -w ./wordlist.txt -u http://$RHOST/FUZZ -e .txt,.html,.php,bak -o ffuf.out"
+echo -e "ffuf -c -w ./wordlist.txt -u http://$RHOST/FUZZ -fc 404 -e .txt,.html,.php,bak -o ffuf.out"
 
-echo -e "\n## Wfuzz"
-echo -e "wfuzz -c -u http://$RHOST/FUZZ -w </path/to/wordlist.txt>"
+echo -e "\n## Gobuster Directory Fuzzing\n"
+echo -e "gobuster dir -u http://$RHOST -w ./wordlist.txt -o gobust.out"
+echo -e "gobuster dir -u http://$RHOST -w ./wordlist.txt -x txt,php,html,bak -o gobust.out\n"
 
-echo -e "\n## Ffuf"
-echo -e "ffuf "
+echo -e "--------------------------------------------------------------------------------------\n# Virtual Host Routing / Sub Domain Fuzzing\n"
+echo -e "## Vhost Fuzzing With Wfuzz\n\nwfuzz -c -f sub_wfuzz.out -Z -w top5000.txt -u 'http://$Domain' -H 'Host: FUZZ'"
 
-echo -e "\n## Gobuster"
-echo -e "gobuster dir -u http://$RHOST -w /path/to/wordlist.txt -x txt,php,html,bak -o gobust.out"
+echo -e "\n## Vhost Fuzzing Wtih Ffuf\n"
+echo -e "ffuf -c -w top5000.txt -u http://$RHOST/ -o sub_ffuf.out -H 'Host: FUZZ.$Domain'\n"
 
-echo -e "# Virtual Host Routing / Sub Domain Fuzzing"
-echo -e "## Vhost Fuzzing With Wfuzz"
+echo -e "## Vhost Fuzzing With Gobuster\n"
 
-echo -e "## Vhost Fuzzing Wtih Ffuf"
+echo -e "gobuster vhost -w top5000.txt -u http://$Domain/ -o vhost_gobust.out\n"
 
-echo -e "## Vhost Fuzzing With gobuster"
+echo -e "--------------------------------------------------------------------------------------\n# Web Technology CMS Fuzzing\n"
 
-echo -e "#"
+echo -e "## Web TechNology Leaks In HTTP Response Headers"
+echo -e "\nwhatweb $RHOST\n\ncurl http://$RHOST -v\n"
+
+echo -e "## Wordpress\n"
+echo -e "wpscan --url http://$RHOST/wordpress\n\nwpscan --url http://$RHOST/wordpress -e u\nwpscan --url http://$RHOST/wordpress -e vt, at, t\n"
+echo -e "wpscan --url http://$RHOST/wordpress -P /usr/share/wordlists/fasttrack.txt -U $USER -t 35"
+echo -e "wpscan --url http://$RHOST/wordpress -P /usr/share/wordlists/fasttrack.txt -U user.lst -t 35"
+
+echo -e "wpscan -v --proxy socks5://127.0.0.1:1080 --url http://$RHOST/wordpress"
+
+echo -e "\n## ActiveMQ\n"
+echo -e "mosquitto_sub -h $RHOST -p 61616 -t secret_chat -u admin -P admin -V 31"
+echo -e "mosquitto_sub -h $RHOST -p 61616 -t secret_chat -u $USER -P $PW -V 31"
+
+
+echo -e "\n## Drupal\n"
+echo -e "droopescan scan drupal -u http://$RHOST/ -t 32\n"
+
 echo "#--------------------------------------------------------------------------------------"
 }
 database_help(){
@@ -206,6 +241,9 @@ echo -e "-----------------------------------------------------------------------
 echo -e "john hash.txt\njohn hash.txt -w=/usr/share/wordlists/rockyou.txt\n"
 echo "#--------------------------------------------------------------------------------------"
 }
+network_pivoting(){
+echo "Pivoting Not Finsihed"
+}
 #===================================
 print_all_manual_recon(){
 	windows_help
@@ -214,6 +252,7 @@ print_all_manual_recon(){
 	website_help
 	database_help
 	remote_help
+	network_pivoting
 	exploit_frameworks
 	pw_cracking_help
 }
@@ -232,6 +271,8 @@ elif [[ $option == "d" ]]; then
 	database_help
 elif [[ $option == "r" ]]; then
 	remote_help
+elif [[ $option == "n" ]]; then
+	network_pivoting
 elif [[ $option == "p" ]]; then
 	pw_cracking_help
 elif [[ $option == "e" ]]; then
