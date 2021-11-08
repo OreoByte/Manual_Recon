@@ -1,15 +1,29 @@
 echo "--------------------------------------------------------------------------------------"                                                                                                                                                                                                                                                                                                                                                                                               
 echo -e "--------------------------------------------------------------------------------------\n# Post Shell Privilege EXEC\n"
 echo -e "## Kernel Exploits Checks"
-
 cat <<eof
 uname -a
 cat /etc/os-release
 cat /etc/*-release
 eof
 
-echo -e "## Set-UID & Set-GID"
+echo -e "\n## Sudo group 0r Sudoers file checks"
+cat <<eof
+sudo -l
+cat /etc/sudoers
 
+ls -al /etc/sudoers.d/
+cat /etc/sudoers.d/$USER
+eof
+
+echo -e "\n## Current user and group information"
+cat <<eof
+whoami
+id
+groups
+eof
+
+echo -e "\n## Set-UID & Set-GID"
 cat <<eof
 find / -type f -perm -4000 2>/dev/null
 
@@ -17,18 +31,33 @@ find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null
 find / -xdev -type f -a \(-perm -u+s -o -perm -g+s\) -exec ls -l {} \; 2> /dev/null
 eof
 
-echo -e "## File Ownship Checks"
+echo -e "\n## File Caps"
+echo -e "getcap -r / 2>/dev/null"
+
+echo -e "\n## File Ownship Checks"
 cat <<eof
 ls -al
 
 find / -type f -name $USER 2>/dev/null
 find / -type f -group $GROUP 2>/dev/null
 eof
-echo -e "## File Caps"
-echo -e "getcap -r / 2>/dev/null
 
-echo -e "## Writable Files"
+echo -e "\n## Writable Files 0r Directories"
+cat <<eof
+ls -al
+find / -writable -type d 2>/dev/null
 
-echo -e "## Crontab Checks"
-echo -e "## sudo -l checks"
+find / -type f -name $USER 2>/dev/null
+find / -type f -group $GROUP 2>/dev/null
+eof
+
+echo -e "\n## Crontab Checks"
+cat <<eof
+cat /etc/crontab
+crontab -l
+
+https://github.com/DominicBreuker/pspy
+./psspy64 0r ./psspy32
+eof
+
 echo "--------------------------------------------------------------------------------------"

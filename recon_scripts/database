@@ -14,13 +14,24 @@ echo -e "impacket-mssqlclient $Domain/$USER:$PW@$RHOST\n"
 
 echo -e "mssql -s $RHOST -u $USER -p $PW\n"
 
-echo -e "--------------------------------------------------------------------------------------\n## No-SQL Client\n"
+echo -e "--------------------------------------------------------------------------------------"
+echo -e "### SQLite3 DataBase\n"
+cat <<eof
+sqlite3 database-file.db
+sqlitebrowser db_file.db
+
+strings db_file.db
+eof
+
+echo -e "\n--------------------------------------------------------------------------------------\n## No-SQL Client\n"
 echo -e "### Redis Server\n\nredis-cli -h $RHOST\nredis-cli -h $RHOST ping\nredis-cli -h $RHOST info\n"
 
 echo -e "### Apache CouchDB\n\n(FireFox) URL == http://$RHOST:5984/_utils\n"
 echo -e "curl http://$RHOST:5984/_all_dbs\ncurl http://$RHOST:5984/secret/_all_docs\n"
 echo -e "curl -X GET http://$RHOST:5984/Database_Name/Record-ID-Hash | jq"
 echo -e "curl -X GET http://$RHOST:5984/secret/a1320dd69fb4570d0a3d26df4e000be7 | jq"
+
+
 
 echo -e "\n--------------------------------------------------------------------------------------\n# Simple SQL Injections\n"
 echo -e "## Automated SQL-Injection Checks\n\nsqlmap -u http://$RHOST/login.php\nsqlmap -r webrequest.req\n"

