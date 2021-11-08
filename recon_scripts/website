@@ -1,0 +1,56 @@
+echo "#--------------------------------------------------------------------------------------"
+echo -e "\n# Web Server Fuzzing\n"
+
+echo -e "--------------------------------------------------------------------------------------\n# Directory Brute Forcing\n"
+echo -e "## Feroxbuster Directory Fuzzing\n"
+echo -e "feroxbuster -u $RHOST"
+echo -e "feroxbuster -u $RHOST -w ./wordlist.txt"
+echo -e "feroxbuster -u $RHOST -w ./wordlist.txt -e txt,php,html,bak"
+
+echo -e "\n## Dirb Directory Fuzzing"
+echo -e "dirb http://$RHOST\ndirb http://$RHOST -X .txt,.php,.html,.bak -o dirb.out\n"
+echo -e "dirb http://$RHOST ./wordlist.txt -X .txt,.bak,.php"
+
+echo -e "\n## Wfuzz Directory Fuzzing"
+echo -e "wfuzz -c -u http://$RHOST/FUZZ -w ./wordlist.txt -f wfuzz.out\nwfuzz -c -u http://$RHOST/FUZZ -w ./wordlist.txt --hc=404 -f wfuzz.out"
+
+echo -e "\n## Ffuf Directory Fuzzing\n"
+echo -e "ffuf -c -w ./wordlist.txt -u http://$RHOST/FUZZ -o ffuf.out"
+echo -e "ffuf -c -w ./wordlist.txt -u http://$RHOST/FUZZ -e .txt,.html,.php,bak -o ffuf.out"
+echo -e "ffuf -c -w ./wordlist.txt -u http://$RHOST/FUZZ -fc 404 -e .txt,.html,.php,bak -o ffuf.out"
+
+echo -e "\n## Gobuster Directory Fuzzing\n"
+echo -e "gobuster dir -u http://$RHOST -w ./wordlist.txt -o gobust.out"
+echo -e "gobuster dir -u http://$RHOST -w ./wordlist.txt -x txt,php,html,bak -o gobust.out\n"
+
+echo -e "--------------------------------------------------------------------------------------\n# Virtual Host Routing / Sub Domain Fuzzing\n"
+echo -e "## Vhost Fuzzing With Wfuzz\n\nwfuzz -c -f sub_wfuzz.out -Z -w top5000.txt -u 'http://$Domain' -H 'Host: FUZZ'"
+
+echo -e "\n## Vhost Fuzzing Wtih Ffuf\n"
+echo -e "ffuf -c -w top5000.txt -u http://$RHOST/ -o sub_ffuf.out -H 'Host: FUZZ.$Domain'\n"
+
+echo -e "## Vhost Fuzzing With Gobuster\n"
+
+echo -e "gobuster vhost -w top5000.txt -u http://$Domain/ -o vhost_gobust.out\n"
+
+echo -e "--------------------------------------------------------------------------------------\n# Web Technology CMS Fuzzing\n"
+
+echo -e "## Web TechNology Leaks In HTTP Response Headers"
+echo -e "\nwhatweb $RHOST\n\ncurl http://$RHOST -v\n"
+
+echo -e "## Wordpress\n"
+echo -e "wpscan --url http://$RHOST/wordpress\n\nwpscan --url http://$RHOST/wordpress -e u\nwpscan --url http://$RHOST/wordpress -e vt, at, t\n"
+echo -e "wpscan --url http://$RHOST/wordpress -P /usr/share/wordlists/fasttrack.txt -U $USER -t 35"
+echo -e "wpscan --url http://$RHOST/wordpress -P /usr/share/wordlists/fasttrack.txt -U user.lst -t 35"
+
+echo -e "wpscan -v --proxy socks5://127.0.0.1:1080 --url http://$RHOST/wordpress"
+
+echo -e "\n## ActiveMQ\n"
+echo -e "mosquitto_sub -h $RHOST -p 61616 -t secret_chat -u admin -P admin -V 31"
+echo -e "mosquitto_sub -h $RHOST -p 61616 -t secret_chat -u $USER -P $PW -V 31"
+
+
+echo -e "\n## Drupal\n"
+echo -e "droopescan scan drupal -u http://$RHOST/ -t 32\n"
+
+echo "#--------------------------------------------------------------------------------------"

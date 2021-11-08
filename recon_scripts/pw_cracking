@@ -1,0 +1,26 @@
+echo "#--------------------------------------------------------------------------------------"
+echo -e "\n--------------------------------------------------------------------------------------\n# Ways To ID Identify The Hash Type"
+
+echo -e "\nhashcat --example-hashes | less\n\nhashid hash.txt\nhashid <hash-string>\nhashid <hash-string> -mj\n"
+
+echo -e "echo -n '<hash-string>' | hash-identifier\ncat hash.txt | hash-identifier\n"
+
+echo -e "haiti <hash-string>\nhaiti -e <extended_salted_hash-string>\n"
+
+echo -e "--------------------------------------------------------------------------------------\n# Extract Password Hashes"
+cat <<eof
+zip2john file.zip > zip_hash
+
+impacket-secretsdump -sam ./sam -system ./system LOCAL
+pypykatz registry --sam sam system | tee local_windows_hashes.txt
+
+impacket-secretsdump -ntds ntds.dit -system system local
+eof
+
+echo -e "--------------------------------------------------------------------------------------\n# Password/Hash Cracking With Hashcat\n"
+echo -e "hashcat -m <hash-mode-number> hash.txt /usr/share/wordlists/rockyou.txt"
+echo -e "hashcat -m 0 md5_hash.txt /usr/share/wordlists/rockyou.txt\n"
+
+echo -e "--------------------------------------------------------------------------------------\n# Password/Hash Cracking With John The Ripper\n"
+echo -e "john hash.txt\njohn hash.txt -w=/usr/share/wordlists/rockyou.txt\n"
+echo "#--------------------------------------------------------------------------------------"

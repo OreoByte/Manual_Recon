@@ -1,0 +1,10 @@
+echo "#--------------------------------------------------------------------------------------"
+echo -e "\n--------------------------------------------------------------------------------------\n# Enum Valid Users\n"
+
+echo -e "# Kerberos"
+
+echo -e "# Ways To Authenticate To Windows Machine"
+
+echo -e "# Exploit Group Permissions"
+
+echo -e "# Bypass Windows Security"

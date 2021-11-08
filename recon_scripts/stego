@@ -1,0 +1,22 @@
+echo "--------------------------------------------------------------------------------------"
+echo -e "# Image Stego"
+
+cat <<eof
+
+steghide extract -sf image.jpg
+
+zsteg image.png
+zsteg -a image.png
+
+zsteg -E b4,bgr,msb,xy concat_v.png > filename.pgp
+zsteg -l 45 concat_v.png -E b1,b,lsb,xy
+
+zsteg flag.png -e extradata:0 | zlib-flate -uncompress
+zsteg flag.png -e extradata:0 > data
+
+eof
+
+echo -e "# Document Stego"
+
+echo -e "Audio Stego"
+echo "--------------------------------------------------------------------------------------"
