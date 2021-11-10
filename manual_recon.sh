@@ -55,7 +55,8 @@ man_help() {
 	echo -e "-o s | Stego Cheat Sheet"
 	echo -e "-o p | Password/Hash Cracking Cheat Sheet"
 	echo -e "-o w | Web Server Cheat Sheet"
-	echo -e "-o d | Database Cheat Sheet\n-o n | Network Pivoting Cheat Sheet\n"
+	echo -e "-o d | Database Cheat Sheet\n-o n | Network Pivoting Cheat Sheet"
+	echo -e "-o f | How To Transfer Files Between Machines Cheat Sheet\n"
 	echo -e "-o a | Dump All Current Cheat Sheets\n"
 	echo "#--------------------------------------------------------------------------------"
 	echo -e "# RHORT, RPOST, LHOST, LPORT, and other User Arguments\n "
@@ -75,14 +76,15 @@ man_help() {
 	echo -e "\n#--------------------------------------------------------------------------------------"
 }
 print_all_manual_recon(){
-        . ./recon_scripts/windows
-        . ./recon_scripts/linux
-        . ./recon_scripts/stego
-        . ./recon_scripts/website
-        . ./recon_scripts/database
-        . ./recon_scripts/network_pivoting
-        . ./recon_scripts/pw_cracking
-        . ./recon_scripts/exploit_frameworks
+	. ./recon_scripts/windows
+	. ./recon_scripts/linux
+	. ./recon_scripts/stego
+	. ./recon_scripts/website
+	. ./recon_scripts/database
+	. ./recon_scripts/network_pivoting
+	. ./recon_scripts/pw_cracking
+	. ./recon_scripts/exploit_frameworks
+	. ./recon_scripts/file_transfer
 }
 #--------------------------------
 if [[ $option == "m" ]]; then
@@ -101,6 +103,8 @@ elif [[ $option == "p" ]]; then
 	. ./recon_scripts/pw_cracking
 elif [[ $option == "e" ]]; then
 	. ./recon_scripts/exploit_frameworks
+elif [[ $option == "f" ]]; then
+	. ./recon_scripts/file_transfer
 elif [[ $option == "a" ]]; then
 	print_all_manual_recon
 else

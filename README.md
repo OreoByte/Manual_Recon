@@ -2,6 +2,8 @@
 
 ## Work In Progress
 
+Manual Recon is a interactive cheat sheet with a variety of example
+
 ```perl
  __  __       _   _          _    _       ____       ____      _   _ _
 |  \/  | __ _| \ | |_   _   / \  | |     |  _ \ ___ / ___|___ | \ | | |
