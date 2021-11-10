@@ -7,13 +7,17 @@ cat <<eof
 
 ### Within a Meterpreter Session
 run autoroute -s <subnet/subnet-mask>
+
 run autoroute -s 172.16.50.0/24
+run autoroute -s $SUBNET
 
 0r
 
 ### Outside A Metasploit Module
 route add 255.255.255.0/24 <session-number>
 route add 255.255.255.0/24 1
+
+route add $SUBNET 1
 
 ### Setup Socks Proxy and Configure ProxyChains
 use auxiliary/server/socks_proxy
@@ -41,14 +45,14 @@ cat <<eof
 ### Local Port Forward
 
 ssh -L 8000:172.16.0.10:80 user@172.16.0.5 -fN
-ssh -L 8000:$INTERALHOST:80 $USER@$RHOST -fN
+ssh -L 8000:$INSIDE_BOX:80 $USER@$RHOST -fN
 
 nmap localhost -p 8000
 
 ### Reverse Port Forward
 
 ssh -R 8000:172.16.0.10:80 user@172.16.0.5 -i ssh.key -fN
-ssh -R 8000:$INTERALHOST:80 $LUSER@$LHOST -fN
+ssh -R 8000:$INSIDE_BOX:80 $LUSER@$LHOST -fN
 
 nmap localhost -p 8000
 

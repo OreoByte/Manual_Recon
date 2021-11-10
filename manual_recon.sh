@@ -4,7 +4,7 @@ RPORT='4444'
 LHOST='127.0.0.1'
 LPORT='6900'
 SUBNET='127.0.0.1/24'
-INTERALHOST='172.16.10.5'
+INSIDE_BOX='172.16.10.5'
 USER='UserName'
 LUSER='kali'
 PW='P@ssw0rd'
@@ -25,6 +25,7 @@ case "$1" in
 	USER=$(cat $config|grep USER|grep -o -P "(?<=').*(?=')")
 	LUSER=$(cat $config|grep 'LUSER'|grep -o -P "(?<=').*(?=')")
 	PW=$(cat $config|grep PW|grep -o -P "(?<=').*(?=')")
+	INSIDE_BOX=$(cat $config|grep 'INSIDE_BOX'|grep -o -P "(?<=').*(?=')")
 	GROUP=$(cat $config|grep GROUP|grep -o -P "(?<=').*(?=')");;
 	-rh) RHOST=$2;;
 	-rp) RPORT=$2;;
@@ -36,7 +37,8 @@ case "$1" in
 	-p) PW=$2;;
 	-g) GROUP=$2;;
 	-lu) LUSER=$2;;
-	-ih) INTERALHOST=$2;;
+	-ib) INSIDE_BOX=$2;;
+	-ih) INSIDE_BOX=$2;;
 	-s) SUBNET=$2
 esac
 shift
@@ -62,7 +64,8 @@ man_help() {
 	echo -e "# RHORT, RPOST, LHOST, LPORT, and other User Arguments\n "
 	echo -e "-rh <RHOST-IP> | RHOST/Target IP-Address\n-rp <RPORT-NUM> | RPORT or Port Number Of Target"
 	echo -e "-lp <LHOST-IP> | LHOST/Listen IP-Address\n-lp <LPORT-NUM> | LPORT or Port Number Of Listener\n"
-	echo -e "-s <SUBNET> | <SUBNET/SUBNET_MASK> To set for certain cheat sheets like network pivoting\n"
+	echo -e "-s <SUBNET> | <SUBNET/SUBNET_MASK> To set for certain cheat sheets like network pivoting"
+	echo -e "-ib 0r -ih <INTERNAL-Box/INTERAL-Host> | IP-Address 0r Hostname of Internal Machine Inside a network you need to Pivot to\n"
 	echo -e "# Domain Nane and Database Name\n\n-db <DB_Name> | Database Name To Use or Select"
 	echo -e "-d <Domain_Name> | Domain or Netbios Name Of Remote RHOST\n"
 	echo -e "# Custom Username and Password\n\n-u <username> | Username Of A Discovered User\n-p <password> | Password To Test or Has Been Discovered\n"
@@ -72,7 +75,7 @@ man_help() {
 	echo "#--------------------------------------------------------------------------------"
 	echo -e "# Manual Recon Examples Commands\n"
 	echo -e "./manual_recon.sh -o w -rh 10.10.10.1\n./manual_recon.sh -c user.config -u superadmin"
-	echo -e "./manual_recon.sh -o n -rh 10.10.138.2 -s 10.10.138.0/24 -u cthulhu -lh 10.15.28.40 -ih 172.16.4.21"
+	echo -e "./manual_recon.sh -o n -rh 10.10.138.2 -s 10.10.138.0/24 -u cthulhu -lh 10.15.28.40 -ib 172.16.4.21"
 	echo -e "\n#--------------------------------------------------------------------------------------"
 }
 print_all_manual_recon(){

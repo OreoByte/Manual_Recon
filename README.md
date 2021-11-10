@@ -1,8 +1,8 @@
 # Manual_Recon
 
-## Work In Progress
+## What Is Manual Recon?
 
-Manual Recon is a interactive cheat sheet with a variety of example
+`Manual Recon is a interactive cheat sheet with a variety of examples to aid in Ethical Hacking 0r CTF events`
 
 ```perl
  __  __       _   _          _    _       ____       ____      _   _ _
@@ -36,4 +36,23 @@ Manual Recon is a interactive cheat sheet with a variety of example
          ,/',/###$\{*\%&\ `'``-,|}$$\,____,-'%`%%%`',\&$$$\,
           ,/ ###$${\`,}%`'-, ƒƒ{`{$$$\`",--,_%_.,_%%%`\&&&$}\
         -;*%%,#$$$}\}{_%%&& } `ƒƒ'\--,.'%%%%_`,*# `'`'`\&_{
+```
+
+## Basic Use Of Manual Recon
+
+```bash
+# Help Menu
+
+chmod +x manual_recon.sh
+./manual_recon.sh
+
+# How to configure commands
+
+./manual_recon.sh -o <cheat-sheet>
+./manual_recon.sh -o <cheat-sheet> -c <config_file>
+./manual_recon.sh -o <cheat-sheet> -c <config_file> <extra-options>
+
+# Network Pivoting Cheat Sheet Example command
+
+./manual_recon.sh -o n -s 10.10.10.0/24 -rh 10.10.10.219 -lh 10.10.200.49 -ih 172.16.12.38
 ```
